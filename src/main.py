@@ -33,18 +33,23 @@ def router_ip(wiowm_list, ip_list):
 def zip_ip_dict(list1, list2):
     return dict(zip(list1, list2))
 
-def router_host_ip_set(wiowm_list, ip_list, dict_ip):
+def router_host_ip_set(wiowm_list, dict_ip):
     for j in range(0, len(wiowm_list)):
         stat_temp = f'{wiomw_list[j][5]}'
+        ip_temp = f'{wiomw_list[j][1]}'
         if("(router)" in stat_temp):
-            router_ip = f'{dict_ip}'
+            router_ip = dict_ip.get(f'{stat_temp}')
+            print(router_ip)
+        if("Your device)" in stat_temp):
+            host_ip = dict_ip.get(f'{stat_temp}')
+            print(host_ip)
 
 list_connections(wiomw_list)
 ip_connected(wiomw_list, ip_list)
 print(ip_list)
 stat_ip_list = router_ip(wiomw_list, ip_list)
 print(stat_ip_list)
-dict_ip = zip_ip_dict(ip_list, stat_ip_list)
+dict_ip = zip_ip_dict(stat_ip_list, ip_list)
 print(dict_ip)
-
+router_host_ip_set(wiomw_list, dict_ip)
 
