@@ -1,71 +1,64 @@
+from typing import TypeVar
+from pytermgui import (
+        getch,
+        keys,
+        save_cursor,
+        restore_cursor,
+        report_cursor,
+        Widget,
+        clear,
+        get_terminal,
+        mouse_handler,
+)
 import pytermgui as ptg
-from pytermgui.pretty import pprint
 
-OUTPUT = {}
+def inline(widget):
+    terminal = get_terminal()
 
-def submit(manager: ptg.WindowManager, window: ptg.Window) -> None:
-    for widget in window:
-        if isinstace(widget, ptg.InputField):
-            OUTPUT[widget.prompt] = widget.value
-            continue
+    widget.pos = report_cursor()
 
-        if isinstance(widget, ptg.Container):
-            label, field = iter(widget)
-            OUTPUT[label.value] = field.value
+    def _print_widget():
+        save_cursor()
 
-    manager.stop()
+        for line in widget.get_lines():
+            print(line)
 
-CONFIG = """
-config:
-    InputField:
-        styles:
-            prompt: dim italic
-            cursor: '@72'
-    Label:
-        styles:
-            value: dim bold
-    Window:
-        styles:
-            border: '60'
-            corner: '60'
-    Container:
-        styles:
-            border: '96'
-            corner: '96'
-"""
+        restore_cursor()
 
-with ptg.YamlLoader() as loader:
-    loader.load(CONFIG)
+    def _clear_widget():
+        save_cursor()
 
-with ptg.WindowManager() as manager:
-    window = (
-        ptg.Window(
-            "",
-            ptg.InputField("Balazs", prompt="Name: "),
-            ptg.InputField("Some street", prompt="Address: "),
-            ptg.InputField("+11 0 123 456", prompt="Phone number: "),
-            "",
-            ptg.Container(
-                "Additional notes:",
-                ptg.InputField(
-                    "A whole bunch of\nMeaningful notes\nand stuff", multiline=True
-                ),
-                box="EMPTY_VERTICAL",
-            ),
-            "",
-            ["Submit", lambda *_: submit(manager, window)],
-            width=60,
-            box="DOUBLE",
-        )
-        .set_title("[210 bold]New contact")
-        .center()
-    )
+        for _ in range(widget.height):
+            clear("line")
+            terminal.write("\n")
 
-    # For the screenshot's sake
-    window.select(0)
+        restore_cursor()
+        terminal.flush()
 
-    manager.add(window)
+    _print_widget()
 
-# pprint(OUTPUT)
+    with mouse_handler(["press_hold", "hover"], "decimal_xterm") as translate:
+        while True:
+            key = getch(interrupts=False)
 
+            if key == keys.CTRL_C:
+                break
 
+            if not widget.handle_key(key):
+                events = translate(key)
+
+                if events is None:
+                    continue
+
+                for event in events:
+                    if event is None:
+                        continue
+                    widget.handle_mouse(event)
+
+            _clear_widget()
+            _print_widget()
+    
+    _clear_widget()
+    return widget
+
+prompt_widget = ptg.inline(built_prompt())
