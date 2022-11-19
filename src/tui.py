@@ -1,64 +1,72 @@
-from typing import TypeVar
-from pytermgui import (
-        getch,
-        keys,
-        save_cursor,
-        restore_cursor,
-        report_cursor,
-        Widget,
-        clear,
-        get_terminal,
-        mouse_handler,
-)
 import pytermgui as ptg
+import gravity_modules as gm
 
-def inline(widget):
-    terminal = get_terminal()
+gm.ip_connected(gm.wiomw_list, gm.ip_list)
+stat_ip_list = gm.router_ip(gm.wiomw_list, gm.ip_list)
+dict_ip = gm.zip_ip_dict(stat_ip_list, gm.ip_list)
+router_ip = gm.router_ip_set(gm.wiomw_list, dict_ip)
+host_ip = gm.host_ip_set(gm.wiomw_list, dict_ip)
 
-    widget.pos = report_cursor()
+CONFIG = """
+config:
+    InputField:
+        styles:
+            prompt: dim italic
+            cursor: '@72'
+        Label:
+            styles:
+                value: dim bold
+        Window:
+            styles:
+                border: '60'
+                corner: '60'
+        Container:
+            styles:
+                border: '96'
+                corner: '96'
+"""
 
-    def _print_widget():
-        save_cursor()
+with ptg.YamlLoader() as loader:
+    loader.load(CONFIG)
 
-        for line in widget.get_lines():
-            print(line)
+with ptg.WindowManager() as manager:
+    window = (
+            ptg.Window(
+                "",
+                ptg.InputField("", prompt="IP Info:"),
+                "",
+                ptg.Container(
+                    f'Router IP: {router_ip}',
+                    f'Host IP: {host_ip}',
+                    box = "EMPTY_VERTICAL",
+                ),
+                "",
+                width = 60,
+                box = "DOUBLE",
+            )
+            .set_title("[210 bold]gravity", position=0)
+            .center()
+    )
 
-        restore_cursor()
+    window2 = (
+            ptg.Window(
+                "",
+                ptg.InputField("Not", prompt="Name: "),
+                "",
+                ptg.Container(
+                    "Hello",
+                    box = "EMPTY_HORIZONTAL",
+                ),
+                "",
+                width = 60,
+                box = "DOUBLE",
+            )
+            .set_title("[210 bold]gravity2")
+            .center()
+    )
 
-    def _clear_widget():
-        save_cursor()
+    window.select(0)
+    window2.select(1)
 
-        for _ in range(widget.height):
-            clear("line")
-            terminal.write("\n")
-
-        restore_cursor()
-        terminal.flush()
-
-    _print_widget()
-
-    with mouse_handler(["press_hold", "hover"], "decimal_xterm") as translate:
-        while True:
-            key = getch(interrupts=False)
-
-            if key == keys.CTRL_C:
-                break
-
-            if not widget.handle_key(key):
-                events = translate(key)
-
-                if events is None:
-                    continue
-
-                for event in events:
-                    if event is None:
-                        continue
-                    widget.handle_mouse(event)
-
-            _clear_widget()
-            _print_widget()
-    
-    _clear_widget()
-    return widget
-
-prompt_widget = ptg.inline(built_prompt())
+    manager.add(window)
+    manager.add(window2)
