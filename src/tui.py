@@ -1,5 +1,6 @@
 import pytermgui as ptg
 import gravity_modules as gm
+from pytermgui.window_manager.layouts import Slot, ROW_BREAK
 
 gm.ip_connected(gm.wiomw_list, gm.ip_list)
 stat_ip_list = gm.router_ip(gm.wiomw_list, gm.ip_list)
@@ -30,6 +31,26 @@ with ptg.YamlLoader() as loader:
     loader.load(CONFIG)
 
 with ptg.WindowManager() as manager:
+    layout = manager.layout
+
+    layout.add_slot(Slot("Header", width=ptg.terminal.width - 30, height=7))
+    layout.add_slot(Slot("Header Right"))
+
+    layout.add_break()
+
+    layout.add_slot(Slot("Body Left"))
+    layout.add_slot(Slot("Body Right"))
+
+    layout.add_break()
+
+    layout.add_slot(Slot("Footer", height=5))
+
+    for slot in layout.slots:
+        if slot is ROW_BREAK:
+            continue
+        
+        manager.add(ptg.Window(f"[bold] {slot.label}", box="DOUBLE"), animate=False)
+
     window = (
             ptg.Window(
                 "",
@@ -47,26 +68,6 @@ with ptg.WindowManager() as manager:
             .set_title("[210 bold]gravity", position=0)
             .center()
     )
-
-    window2 = (
-            ptg.Window(
-                "",
-                ptg.InputField("Not", prompt="Name: "),
-                "",
-                ptg.Container(
-                    "Hello",
-                    box = "EMPTY_HORIZONTAL",
-                ),
-                "",
-                width = 60,
-                box = "DOUBLE",
-            )
-            .set_title("[210 bold]gravity2")
-            .center()
-    )
-
     window.select(0)
-    window2.select(1)
 
     manager.add(window)
-    manager.add(window2)
