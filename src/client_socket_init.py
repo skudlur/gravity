@@ -1,13 +1,35 @@
 import socket
-import sys
+import os
+import tqdm
+import tui
 
-if (len(sys.argv) > 1):
-    ServerIp = sys.argv[1]
+SEPARATOR = "<SEPARATOR>"
+BUFFER_SIZE = 4096
 
-s = socket.socket()
+host = tui.host_ip
 
-PORT = 9898
+port = 5001
 
-s.connect((ServerIp, PORT))
+filename = ""
 
-file
+filesize = 0
+
+def socket_init():
+    s = socket.socket()
+
+    print(f"* Connection to {host}:{port}")
+    s.connect((host, port))
+    print("* Connected.")
+
+    s.send(f"{filename}{SEPARATOR}{filesize}".encode())
+
+    progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    with open(filename, "rb") as f:
+        while True:
+            bytes_read = f.read(BUFFER_SIZE)
+            if not bytes_read:
+                break
+            s.sendall(bytes_read)
+            progress.update(len(bytes_read))
+
+    s.close()

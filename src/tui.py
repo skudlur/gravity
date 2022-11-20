@@ -7,28 +7,43 @@ from rich.text import Text
 from rich.live import Live
 from rich.layout import Layout
 import gravity_modules as gm
+import tui_modules as tm
+import os
 
-layout = Layout()
-print(layout)
+stat_ip_list = gm.router_ip(gm.wiomw_list, gm.ip_list)
+dict_ip = gm.zip_ip_dict(stat_ip_list, gm.ip_list)
+router_ip = gm.router_ip_set(gm.wiomw_list, dict_ip)
+host_ip = gm.host_ip_set(gm.wiomw_list, dict_ip)
+table = tm.table_gen()
 
-gm.ip_connected(gm.wiomw_list, gm.ip_list)
-gm.name_connected(gm.wiomw_list, gm.name_list)
+os.system("clear")
 
 text = Text("gravity", justify="center")
 text.stylize("bold magenta", 0, 3)
 panel = Panel(text)
 print(panel)
 
-def table_gen() -> Table:
-    table = Table(title="IP List", box=box.DOUBLE)
+text2 = Text(f"Router IP: {router_ip}" + f"\nHost IP: {host_ip}", justify = "center")
+text2.stylize("pink")
+panel2 = Panel(text2)
 
-    table.add_column("No.", justify="center", style="cyan")
-    table.add_column("Name", justify="center", style="magenta")
-    table.add_column("IP Address", justify="center", style="green")
-    
-    for j in range(0, len(gm.ip_list)):
-        table.add_row(f"{j+1}", f"{gm.name_list[j]}", f"{gm.ip_list[j]}")
-    return table
+sys_info = Text("System Information", justify="center")
+sys_panel = Panel(sys_info)
 
-print(table_gen())
+layout = Layout()
+layout.split_row(
+        Layout(name="Available devices"),
+        Layout(name="left")
+)
+layout["Available devices"].update(
+        table
+)
+layout["left"].ratio = 2
+layout["left"].split_column(
+        Layout(name="System Info")
+)
+layout["System Info"].update(
+        panel2
+)
 
+print(layout)

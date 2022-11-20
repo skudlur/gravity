@@ -1,31 +1,39 @@
 import socket
+import tqdm
+import os
+import tui
 
-s = socket.socket()
+SERVER_HOST = "0.0.0.0"
+SERVER_PORT = 5001
 
-PORT = 9898
-print("Server side initiated on port number:", PORT) 
+BUFFER_SIZE = 4096
+SEPARATOR = "<SEPARATOR>"
 
-s.bind(('', PORT))
+def socket_init():
+    s = socket.socket()
 
-s.listen(10)
+    s.bind((SERVER_HOST, SERVER_PORT))
 
-file = open("../Documents/test.txt", "wb")
-print("File staged to send to receiver")
+    s.listen(5)
+    print(f"* Listening as {SERVER_HOST}:{SERVER_PORT}")
 
-while True:
-    conn, addr = s.accept()
+    client_socket, address = s.accept()
+    print(f"* {address} is connected.")
 
-    conn.send(msg.encode())
+    received = client_socket.recv(BUFFER_SIZE).decode()
+    filename, filesize = received.split(SEPARATOR)
 
-    recvData = conn.recv(1024)
-    while recvData:
-        file.write(recvData)
-        recvData = conv.recv(1024)
+    filename = os.path.basename(filename)
+    filesize = int(filesize)
 
-    file.close()
-    print("Staged file sent successfully")
+    progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    with open(filename, "wb") as f:
+        while True:
+            bytes_read = client_socket.recv(BUFFER_SIZE)
+            if not bytes_read:
+                break
+            f.write(bytes_read)
+            progress.update(len(bytes_read))
 
-    conn.close()
-    print("Server-client connection closed")
-
-    break
+    client_socket.close()
+    s.close()
