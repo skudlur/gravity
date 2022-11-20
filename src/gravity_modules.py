@@ -6,17 +6,18 @@ import os
 wiomw_list = who() # who(n)
 conn_list = []
 ip_list = []
+name_list = []
 #router_ip = ''
 #host_ip = ''
 text = 'no'
 
-def list_connections(wiomw_list):
+def list_connections(wiomw_list, conn_list):
     for j in range(0, len(wiomw_list)):
-        comm = f"\n{wiomw_list[j][0]} {wiomw_list[j][1]}\n{wiomw_list[j][2]} {wiomw_list[j][3]}\n{wiomw_list[j][4]} {wiomw_list[j][5]}\n"
-        print(comm)
+        comm = f"{wiomw_list[j][0]} {wiomw_list[j][1]} {wiomw_list[j][2]} {wiomw_list[j][3]} {wiomw_list[j][4]} {wiomw_list[j][5]}"
+        conn_list.append(comm)
 
-def ip_connected(wiowm_list, ip_list):
-    for j in range(0, len(wiowm_list)):
+def ip_connected(wiomw_list, ip_list):
+    for j in range(0, len(wiomw_list)):
         ip_temp = f"{wiomw_list[j][1]}"
         if(len(ip_temp) > 15):
             try:
@@ -28,6 +29,11 @@ def ip_connected(wiowm_list, ip_list):
             ip_list.append(ip_temp)
         else:
             ip_list.append(ip_temp)
+
+def name_connected(wiomw_list, name_list):
+    for j in range(0, len(wiomw_list)):
+        name_temp = f"{wiomw_list[j][5]}"
+        name_list.append(name_temp)
 
 def router_ip(wiowm_list, ip_list):
     stat_ip_list = []
@@ -64,5 +70,3 @@ def host_ip_set(wiowm_list, dict_ip):
 #print(dict_ip)
 #router_host_ip_set(wiomw_list, dict_ip)
 
-#list_connections(wiomw_list, conn_list)
-#print(conn_list)
