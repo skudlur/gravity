@@ -6,7 +6,7 @@ import tui
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 4096
 
-host = tui.host_ip
+host = ""
 
 port = 5001
 
