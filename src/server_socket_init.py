@@ -3,7 +3,7 @@ import tqdm
 import os
 import tui
 
-SERVER_HOST = "0.0.0.0"
+SERVER_HOST = tui.host_id
 SERVER_PORT = 5001
 
 BUFFER_SIZE = 4096
