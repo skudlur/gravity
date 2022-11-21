@@ -4,7 +4,8 @@ import os
 import tui
 
 SERVER_HOST = tui.host_ip
-SERVER_HOST = SERVER_HOST[:-1]
+if(SERVER_HOST[:-1] == ","):
+    SERVER_HOST = SERVER_HOST[:-1]
 SERVER_PORT = 5001
 
 BUFFER_SIZE = 4096
