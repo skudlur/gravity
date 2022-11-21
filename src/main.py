@@ -8,9 +8,9 @@ while True:
 
     if (mode == 1):
         ssi.socket_init()
-    else if (mode == 2):
+    elif (mode == 2):
         csi.filename = str(input("Enter your filename: "))
         csi.filesize = os.path.getsize(csi.filename)
         csi.socket_init()
-    else if (mode != 1 or mode != 2):
+    elif (mode != 1 or mode != 2):
         raise Exception("Wrong mode")
