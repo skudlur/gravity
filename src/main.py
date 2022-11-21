@@ -11,6 +11,7 @@ while True:
 
     if (mode == 1):
         ssi.socket_init()
+        break
     elif (mode == 2):
         ip_list = gm.ip_list[1:-1]
         for i in range(len(ip_list)-1):
@@ -23,6 +24,7 @@ while True:
         csi.filename = str(input("Enter your filename: "))
         csi.filesize = os.path.getsize(csi.filename)
         csi.socket_init()
+        break
     elif (mode != 1 or mode != 2):
         raise Exception("Wrong mode")
 
