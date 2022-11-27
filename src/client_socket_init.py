@@ -1,35 +1,87 @@
 import socket
+<<<<<<< HEAD
 import os
 import tqdm
 import tui
+from constants import *
 
-SEPARATOR = "<SEPARATOR>"
-BUFFER_SIZE = 4096
+class Server:
+    def __init__(self, message):
+        try:
+            self.message = message
 
-host = ""
+            self.s = socket.socket(socket.AF_INIT, socket.SOCK_STREAM)
+            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-port = 5001
+            self.connections = []
 
-filename = ""
+            self.peers = []
 
-filesize = 0
+            self.s.bind((HOST, PORT))
 
-def socket_init():
-    s = socket.socket()
+            self.s.listen(1)
 
-    print(f"* Connection to {host}:{port}")
-    s.connect((host, port))
-    print("* Connected.")
+            print("Server Running..")
 
-    s.send(f"{filename}{SEPARATOR}{filesize}".encode())
+            self.run()
+        except Exception:
+            sys.exit()
 
-    progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-    with open(filename, "rb") as f:
+
+    def handler(self, connection, a):
+        try:
+            while True:
+                data = connection.recv(BYTE_SIZE)
+                for connection in self.connections:
+                    if data and data.decode('utf-8')[0].lower() == "q":
+                        self.disconnect(connection, a)
+                        return
+                    elif data and data.decode('utf-8') == REQUEST_STRING:
+                        print("Uploading")
+                        connection.send(self.message)
+        except Exception:
+            sys.exit()
+
+
+    def disconnect(self, connection, a):
+        self.connections.remove(connection)
+        self.peers.remove(1)
+        connection.close()
+        self.send_peers()
+        print("{} disconnected".format(a))
+    
+    def run(self):
         while True:
-            bytes_read = f.read(BUFFER_SIZE)
-            if not bytes_read:
-                break
-            s.sendall(bytes_read)
-            progress.update(len(bytes_read))
+            connection, a = self.s.accept()
+            self.peers.append(a)
+            print("Peers are: {}".format(self.peers))
+            self.send_peers()
 
-    s.close()
+            c_thread = threading.Thread(target = self.handler, args = (connection, a))
+            c_thread.daemon = True
+            c_thread.start()
+            self.connections.append(connection)
+            print("{} connected".format(a))
+
+    def send_peers(self):
+        peer_list = ""
+        for peer in self.peers:
+            peer_list = peer_list + str(peer[0]) + ","
+
+        for connection in self.connections:
+            data = PEER_BYTE_DIFFERENTIATOR + bytes(peer_list, 'utf-8')
+            connection.send(PEER_BYTE_DIFFERENTIATOR + bytes(peer_list, 'utf-8'))
+=======
+import sys
+
+if (len(sys.argv) > 1):
+    ServerIp = sys.argv[1]
+
+s = socket.socket()
+
+PORT = 9898
+
+s.connect((ServerIp, PORT))
+
+file
+>>>>>>> parent of 76f2055 (functional patch)
